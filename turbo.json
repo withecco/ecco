@@ -5,9 +5,8 @@
     "//#format-and-lint:fix": {
       "cache": false
     },
-
     "build": {
-      "dependsOn": ["prebuild", "^build"],
+      "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
     "dev": {
@@ -20,7 +19,14 @@
     "test": {
       "dependsOn": ["^test"]
     },
-
-    "prebuild": {}
+    "changeset": {
+      "cache": false
+    },
+    "version": {
+      "cache": false
+    },
+    "publish": {
+      "cache": false
+    }
   }
 }

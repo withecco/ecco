@@ -1,13 +1,18 @@
 {
-  "name": "@ecco/api",
+  "name": "ecco",
+  "private": true,
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
     "clean": "turbo run clean",
-    "start": "turbo run start"
+    "start": "turbo run start",
+    "changeset": "turbo run changeset",
+    "version": "turbo run version",
+    "publish": "turbo run publish"
   },
   "description": "Ecco MCP Manager",
   "devDependencies": {
+    "@changesets/cli": "^2.29.5",
     "turbo": "^2.5.5"
   },
   "packageManager": "bun@1.2.19",

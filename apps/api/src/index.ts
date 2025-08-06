@@ -1,6 +1,9 @@
-import hono from "hono";
-import { test } from "@ecco/core";
+import { Hono } from "hono";
+const app = new Hono();
 
-console.log("Hello via API!");
+app.get("/", (c) => c.text("Hono!"));
 
-console.log(test());
+export default {
+  port: 3000,
+  fetch: app.fetch,
+};
