@@ -5,6 +5,16 @@
     "//#format-and-lint:fix": {
       "cache": false
     },
+    "//#changeset": {
+      "cache": false
+    },
+    "//#version": {
+      "cache": false
+    },
+    "//#publish": {
+      "cache": false,
+      "dependsOn": ["build", "test"]
+    },
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
@@ -18,15 +28,6 @@
     },
     "test": {
       "dependsOn": ["^test"]
-    },
-    "changeset": {
-      "cache": false
-    },
-    "version": {
-      "cache": false
-    },
-    "publish": {
-      "cache": false
     }
   }
 }
