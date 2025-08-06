@@ -1,0 +1,22 @@
+# Dependencies
+node_modules
+
+# Env Vars
+.envrc
+.direnv
+
+# Turbo
+.turbo
+
+# Ecco
+.ecco
+
+# Build Outputs
+dist
+
+# Development
+.mcp
+flake.*
+
+# Misc
+.DS_Store
