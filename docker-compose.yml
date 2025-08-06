@@ -1,0 +1,76 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: ecco-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ecco
+      POSTGRES_USER: ecco
+      POSTGRES_PASSWORD: ecco-dev-password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./packages/postgres/migrations:/docker-entrypoint-initdb.d
+    networks:
+      - ecco-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ecco -d ecco"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  redis:
+    image: redis:8-alpine
+    container_name: ecco-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - ecco-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: ecco-api
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://ecco:ecco-dev-password@postgres:5432/ecco
+      - REDIS_URL=redis://redis:6379
+      - PORT=3000
+    volumes:
+      # Mount source code for development hot reload
+      - ./apps/api/src:/app/apps/api/src
+      - ./packages:/app/packages
+    networks:
+      - ecco-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    develop:
+      watch:
+        - action: sync
+          path: ./apps/api/src
+          target: /app/apps/api/src
+        - action: sync
+          path: ./packages
+          target: /app/packages
+
+networks:
+  ecco-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:

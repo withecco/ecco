@@ -1,0 +1,59 @@
+# Dependencies
+node_modules
+
+# Build outputs
+dist
+out
+*.tsbuildinfo
+
+# Environment variables
+.env*
+!.env.example
+
+# Logs
+logs
+*.log
+
+# Coverage
+coverage
+*.lcov
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+
+# CI/CD
+.github
+
+# Documentation
+README.md
+*.md
+!packages/*/README.md
+
+# Turbo
+.turbo
+
+# Misc development files
+.ecco
+.mcp
+flake.*
+.direnv
+.envrc
+
+# Changesets (not needed in container)
+.changeset
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
