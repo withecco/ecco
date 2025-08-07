@@ -9,16 +9,13 @@ const envSchema = z.object({
   REDIS_URL: z.string().url(),
 });
 
-// Parse and validate environment variables
 const parseEnv = () => {
   try {
     return envSchema.parse(process.env);
   } catch (error) {
     console.error("❌ Invalid environment variables in @ecco/api:");
     if (error instanceof z.ZodError) {
-      error.errors.forEach((err) => {
-        console.error(`  - ${err.path.join(".")}: ${err.message}`);
-      });
+      console.error(error);
     }
     process.exit(1);
   }

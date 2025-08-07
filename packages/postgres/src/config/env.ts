@@ -7,13 +7,12 @@ const envSchema = z.object({
 
 const parseEnv = () => {
   try {
+    console.log(process.env.NODE_ENV, process.env.DATABASE_URL);
     return envSchema.parse(process.env);
   } catch (error) {
     console.error("❌ Invalid environment variables:");
     if (error instanceof z.ZodError) {
-      error.errors.forEach((err) => {
-        console.error(`  - ${err.path.join(".")}: ${err.message}`);
-      });
+      console.error(error);
     }
     process.exit(1);
   }

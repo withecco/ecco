@@ -11,7 +11,17 @@
     "changeset": "changeset",
     "version": "changeset version",
     "publish": "changeset publish",
-    "prepare": "husky"
+    "prepare": "husky",
+    "db:generate": "turbo run db:generate",
+    "db:migrate": "turbo run db:migrate",
+    "db:push": "turbo run db:push",
+    "db:studio": "turbo run db:studio",
+    "db:seed": "turbo run db:seed",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "docker:clean": "docker compose down -v && docker system prune -f",
+    "docker:rebuild": "docker compose down -v && docker compose up --build -d",
+    "docker:reset": "docker compose down -v && docker system prune -f && docker compose up --build -d"
   },
   "description": "Ecco MCP Manager",
   "devDependencies": {

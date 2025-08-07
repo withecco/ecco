@@ -1,6 +1,6 @@
 import {
   pgTable,
-  uuid,
+  integer,
   varchar,
   text,
   timestamp,
@@ -8,14 +8,14 @@ import {
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import { users } from "./users";
+import { users } from "@/schema/users";
 
 export const projects = pgTable("projects", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   name: varchar({ length: 255 }).notNull(),
   slug: varchar({ length: 255 }).notNull().unique(),
   description: text(),
-  ownerId: uuid("owner_id")
+  ownerId: integer("owner_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   isPublic: boolean("is_public").default(false).notNull(),
@@ -35,9 +35,5 @@ export const projectsRelations = relations(projects, ({ one }) => ({
 
 export const projectInsertSchema = createInsertSchema(projects);
 export const projectSelectSchema = createSelectSchema(projects);
-
 export type Project = typeof projects.$inferSelect;
 export type NewProject = typeof projects.$inferInsert;
-
-// const rows = await db.select().from(projects).limit(1);
-// const parsed: { id: number; name: string; slug: string} = projectSelectSchema.parse(rows[0]); // Will parse successfully
