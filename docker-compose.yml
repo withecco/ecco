@@ -1,6 +1,7 @@
 services:
+  # PostgreSQL Database
   postgres:
-    image: postgres:17-alpine
+    image: postgres:16-alpine
     container_name: ecco-postgres
     restart: unless-stopped
     environment:
@@ -19,8 +20,10 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  # Redis (for caching, sessions, queues)
   redis:
-    image: redis:8-alpine
+    image: redis:7-alpine
     container_name: ecco-redis
     restart: unless-stopped
     ports:
@@ -34,10 +37,13 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  # API Service (Development with hot reload)
   api:
     build:
       context: .
       dockerfile: apps/api/Dockerfile
+      target: installer  # Stop at installer stage for development
     container_name: ecco-api
     restart: unless-stopped
     ports:
@@ -51,6 +57,8 @@ services:
       # Mount source code for development hot reload
       - ./apps/api/src:/app/apps/api/src
       - ./packages:/app/packages
+      # Exclude node_modules from bind mount
+      - /app/node_modules
     networks:
       - ecco-network
     depends_on:
@@ -58,14 +66,33 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    develop:
-      watch:
-        - action: sync
-          path: ./apps/api/src
-          target: /app/apps/api/src
-        - action: sync
-          path: ./packages
-          target: /app/packages
+    command: ["bun", "--watch", "run", "apps/api/src/index.ts"]
+
+  dbgate:
+    image: dbgate/dbgate
+    container_name: ecco-dbgate
+    restart: unless-stopped
+    ports:
+      - 80:3000
+    volumes:
+      - dbgate_data:/root/.dbgate
+    environment:
+      CONNECTIONS: con1,con2
+      LABEL_con1: Postgres
+      SERVER_con1: postgres
+      DB_con1: ecco
+      USER_con1: ecco
+      PASSWORD_con1: ecco-dev-password
+      PORT_con1: 5432
+      ENGINE_con1: postgres@dbgate-plugin-postgres
+      LABEL_con2: SQLite
+      FILE_con2: /home/jan/feeds.sqlite
+      ENGINE_con2: sqlite@dbgate-plugin-sqlite
+    networks:
+      - ecco-network
+    depends_on:
+      postgres:
+        condition: service_healthy
 
 networks:
   ecco-network:
@@ -74,3 +101,5 @@ networks:
 volumes:
   postgres_data:
   redis_data:
+  dbgate_data:
+    driver: local

@@ -1,45 +1,34 @@
-# Use Bun's official image
-FROM oven/bun:1.2.19-alpine AS base
+# Turborepo + Bun Docker build following official guidelines
+# https://turborepo.com/docs/guides/tools/docker
 
-# Install dependencies only when needed
-FROM base AS deps
+FROM oven/bun:1.2.19-alpine AS base
+RUN apk update && apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Copy root package.json and workspace configuration
-COPY package.json bun.lockb* ./
-COPY turbo.json ./
+# Install turbo globally
+RUN bun install -g turbo
 
-# Copy package.json files for all workspaces
-COPY apps/api/package.json ./apps/api/
-COPY packages/core/package.json ./packages/core/
-COPY packages/postgres/package.json ./packages/postgres/
+FROM base AS pruner
+WORKDIR /app
+COPY . .
+# Prune the workspace for the api app
+RUN turbo prune @ecco/api --docker
 
-# Install dependencies
+FROM base AS installer
+RUN apk update && apk add --no-cache libc6-compat
+WORKDIR /app
+
+# Copy pruned package.json files
+COPY --from=pruner /app/out/json/ .
+# Install dependencies using bun
 RUN bun install --frozen-lockfile
 
-# Build the application
-FROM base AS builder
-WORKDIR /app
+# Copy source code of pruned subworkspace
+COPY --from=pruner /app/out/full/ .
 
-# Copy dependencies from deps stage
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/package.json ./package.json
-COPY --from=deps /app/turbo.json ./turbo.json
+# Build the application (if we add build scripts later)
+# RUN turbo run build --filter=@ecco/api
 
-# Copy source code
-COPY apps/api ./apps/api
-COPY packages/core ./packages/core
-COPY packages/postgres ./packages/postgres
-
-# Copy TypeScript configs
-COPY apps/api/tsconfig.json ./apps/api/
-COPY packages/core/tsconfig.json ./packages/core/
-COPY packages/postgres/tsconfig.json ./packages/postgres/
-
-# Build the application (if you add build scripts later)
-# RUN bun run build
-
-# Production image
 FROM base AS runner
 WORKDIR /app
 
@@ -47,11 +36,11 @@ WORKDIR /app
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 bun
 
-# Copy built application
-COPY --from=builder --chown=bun:nodejs /app/node_modules ./node_modules
-COPY --from=builder --chown=bun:nodejs /app/apps/api ./apps/api
-COPY --from=builder --chown=bun:nodejs /app/packages ./packages
-COPY --from=builder --chown=bun:nodejs /app/package.json ./package.json
+# Copy the built application and dependencies
+COPY --from=installer --chown=bun:nodejs /app/node_modules ./node_modules
+COPY --from=installer --chown=bun:nodejs /app/apps/api ./apps/api
+COPY --from=installer --chown=bun:nodejs /app/packages ./packages
+COPY --from=installer --chown=bun:nodejs /app/package.json ./package.json
 
 USER bun
 
@@ -61,5 +50,5 @@ EXPOSE 3000
 # Set environment variable
 ENV NODE_ENV=production
 
-# Start the application
+# Start the application with bun
 CMD ["bun", "run", "apps/api/src/index.ts"]
