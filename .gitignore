@@ -16,7 +16,6 @@ dist
 
 # Development
 .mcp
-flake.*
 
 # Misc
 .DS_Store
