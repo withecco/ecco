@@ -7,7 +7,7 @@ const envSchema = z.object({
 
 const parseEnv = () => {
   try {
-    console.log(process.env.NODE_ENV, process.env.DATABASE_URL);
+    console.log(process.env.DATABASE_URL, process.env.NODE_ENV);
     return envSchema.parse(process.env);
   } catch (error) {
     console.error("❌ Invalid environment variables:");
