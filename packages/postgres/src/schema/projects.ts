@@ -1,12 +1,12 @@
+import { relations } from "drizzle-orm";
 import {
-  pgTable,
+  boolean,
   integer,
-  varchar,
+  pgTable,
   text,
   timestamp,
-  boolean,
+  varchar,
 } from "drizzle-orm/pg-core";
-import { relations } from "drizzle-orm";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { users } from "@/schema/users";
 
@@ -35,5 +35,6 @@ export const projectsRelations = relations(projects, ({ one }) => ({
 
 export const projectInsertSchema = createInsertSchema(projects);
 export const projectSelectSchema = createSelectSchema(projects);
+
 export type Project = typeof projects.$inferSelect;
 export type NewProject = typeof projects.$inferInsert;

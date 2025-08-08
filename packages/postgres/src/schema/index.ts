@@ -1,5 +1,5 @@
-export { users } from "./users";
-export { projects } from "./projects";
+export * from "./projects";
+export * from "./users";
 
 // - MCP deployments table
 // - Resource allocation tracking

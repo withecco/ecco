@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { users, projects } from "@/schema";
+import { projects, users } from "@/schema";
 
 async function seed() {
   try {
